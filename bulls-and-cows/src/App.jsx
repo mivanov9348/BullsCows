@@ -21,11 +21,13 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState('');
   
-  // НОВ STATE: За бележника на играча
   const [notes, setNotes] = useState('');
 
+  // Добавен state за името на играча
+  const [playerName, setPlayerName] = useState('');
+
   const [level, setLevel] = useState(1);
-  const [lives, setLives] = useState(15);
+  const [lives, setLives] = useState(20); // ПРОМЯНА: Почваме от 20 живота
   const [score, setScore] = useState(0);
   
   const [isLevelCleared, setIsLevelCleared] = useState(false);
@@ -40,9 +42,11 @@ export default function App() {
     setTimeout(() => setError(''), 3000);
   };
 
-  const saveToLeaderboard = (finalLevel, finalScore) => {
+  // Вече приема и името на играча
+  const saveToLeaderboard = (finalLevel, finalScore, name) => {
     const saved = JSON.parse(localStorage.getItem('bullsAndCowsLeaderboard')) || [];
     const newRecord = {
+      name: name.trim() || 'Анонимен', // Ако не въведе нищо, става "Анонимен"
       level: finalLevel,
       score: finalScore,
       date: new Date().toLocaleDateString('bg-BG')
@@ -91,7 +95,7 @@ export default function App() {
 
     if (currentLives === 0) {
       setIsGameOver(true);
-      saveToLeaderboard(level, score);
+      // Тук ВЕЧЕ НЕ запазваме автоматично, чакаме играча да си въведе името
     }
   };
 
@@ -102,25 +106,30 @@ export default function App() {
     setLevel(level + 1);
     setIsLevelCleared(false);
     setGuess('');
-    setNotes(''); // Изчистваме бележките за новото ниво (по желание)
+    setNotes('');
   };
 
   const restartGame = () => {
     setSecret(generateSecretNumber());
     setHistory([]);
     setLevel(1);
-    setLives(15);
+    setLives(20); // ПРОМЯНА: Връщаме на 20 при рестарт
     setScore(0);
     setIsGameOver(false);
     setIsLevelCleared(false);
     setGuess('');
     setNotes('');
+    setPlayerName(''); // Изчистваме полето за име
+  };
+
+  const handleGameOverSave = () => {
+    saveToLeaderboard(level, score, playerName);
+    restartGame();
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4 font-sans bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-gray-800">
       
-      {/* Навигация */}
       <div className="flex gap-4 mb-8">
         <button onClick={() => setView('game')} className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${view === 'game' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white hover:bg-white/30'}`}>🎮 Игра</button>
         <button onClick={() => setView('rules')} className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${view === 'rules' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white hover:bg-white/30'}`}>📖 Правила</button>
@@ -130,11 +139,9 @@ export default function App() {
       {view === 'rules' && <Rules onBack={() => setView('game')} />}
       {view === 'leaderboard' && <Leaderboard onBack={() => setView('game')} />}
 
-      {/* Основна игрална част с Тетрадка отстрани */}
       {view === 'game' && (
         <div className="flex flex-col lg:flex-row gap-6 w-full max-w-4xl justify-center items-start">
           
-          {/* ЛЯВА ЧАСТ: Самата игра */}
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full lg:max-w-md p-8 border border-white/20">
             
             <div className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl mb-6 border border-gray-100 shadow-inner">
@@ -174,16 +181,27 @@ export default function App() {
             {isGameOver && (
               <div className="text-center p-6 bg-gradient-to-b from-red-50 to-red-100 border border-red-200 rounded-2xl shadow-inner mb-6">
                 <h2 className="text-3xl font-black text-red-600 mb-2">КРАЙ НА ИГРАТА! 💀</h2>
-                <p className="text-gray-700 mb-2">Опитите ти свършиха.</p>
                 <p className="text-gray-700 mb-4">Тайното число беше <span className="font-black text-xl text-red-700">{secret}</span></p>
                 
-                <div className="bg-white p-3 rounded-xl mb-6 shadow-sm border border-red-100">
+                <div className="bg-white p-3 rounded-xl mb-4 shadow-sm border border-red-100">
                   <p className="text-sm text-gray-500 font-bold uppercase">Твоят резултат</p>
-                  <p className="text-2xl font-black text-indigo-600">{score} точки (Ниво {level})</p>
+                  <p className="text-2xl font-black text-indigo-600">{score} точки <span className="text-sm font-normal text-gray-500">(Ниво {level})</span></p>
                 </div>
 
-                <button onClick={restartGame} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                  🔄 Нова Игра
+                {/* Поле за име на играча */}
+                <div className="mb-6">
+                  <input
+                    type="text"
+                    maxLength="15"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    placeholder="Въведи твоя никнейм..."
+                    className="w-full px-4 py-3 border-2 border-red-200 rounded-xl focus:outline-none focus:border-red-500 text-center font-bold text-gray-700 shadow-inner"
+                  />
+                </div>
+
+                <button onClick={handleGameOverSave} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                  💾 Запази и Нова Игра
                 </button>
               </div>
             )}
@@ -242,7 +260,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* ДЯСНА ЧАСТ: Тетрадка на играча */}
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full lg:max-w-xs p-6 border border-white/20 flex flex-col h-[500px]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-black text-gray-700 flex items-center gap-2">

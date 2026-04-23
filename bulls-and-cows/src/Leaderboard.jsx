@@ -4,14 +4,11 @@ export default function Leaderboard({ onBack }) {
   const [scores, setScores] = useState([]);
 
   useEffect(() => {
-    // Взимаме масива с резултати от localStorage
     const savedScores = JSON.parse(localStorage.getItem('bullsAndCowsLeaderboard')) || [];
-    // Сортираме ги по ниво (низходящо) и ако са равни - по оставащи животи/точки
     const sortedScores = savedScores.sort((a, b) => {
       if (b.level !== a.level) return b.level - a.level;
       return b.score - a.score;
     });
-    // Взимаме само топ 10
     setScores(sortedScores.slice(0, 10));
   }, []);
 
@@ -44,12 +41,15 @@ export default function Leaderboard({ onBack }) {
                   #{index + 1}
                 </span>
                 <div>
-                  <div className="font-bold text-gray-700">Ниво {score.level}</div>
+                  {/* Тук визуализираме името и нивото */}
+                  <div className="font-bold text-gray-800 text-lg">
+                    {score.name} <span className="text-xs text-gray-400 font-normal ml-1">(Ниво {score.level})</span>
+                  </div>
                   <div className="text-xs text-gray-400">{score.date}</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-black text-indigo-600">{score.score} т.</div>
+                <div className="font-black text-indigo-600 text-lg">{score.score} <span className="text-xs">т.</span></div>
               </div>
             </div>
           ))
