@@ -1,3 +1,5 @@
+import { GAME_SETTINGS } from './constants';
+
 export default function Rules({ onBack }) {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-md p-8 border border-white/20">
@@ -15,7 +17,7 @@ export default function Rules({ onBack }) {
           <div className="text-2xl bg-indigo-100 p-2 rounded-xl">❤️</div>
           <div>
             <h3 className="font-bold text-indigo-700">Начални животи</h3>
-            <p className="text-sm">Започваш играта с общо <strong>15 опита (живота)</strong>. Всеки грешен опит ти взима 1 живот.</p>
+            <p className="text-sm">Започваш играта с общо <strong>{GAME_SETTINGS.INITIAL_LIVES} опита (живота)</strong>. Всеки грешен опит ти взима 1 живот.</p>
           </div>
         </div>
 
@@ -31,7 +33,7 @@ export default function Rules({ onBack }) {
           <div className="text-2xl bg-yellow-100 p-2 rounded-xl">⚡</div>
           <div>
             <h3 className="font-bold text-yellow-700">Бонус за победа</h3>
-            <p className="text-sm">Ако познаеш числото, минаваш на следващо ниво и получаваш <strong>+7 допълнителни опита</strong> към оставащите ти!</p>
+            <p className="text-sm">Ако познаеш числото, получаваш <strong>{GAME_SETTINGS.BASE_SCORE_PER_LEVEL} точки</strong> и <strong>+{GAME_SETTINGS.BONUS_LIVES_PER_LEVEL} допълнителни опита</strong>!</p>
           </div>
         </div>
 

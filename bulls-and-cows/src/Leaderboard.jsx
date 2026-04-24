@@ -1,28 +1,54 @@
 import { useEffect, useState } from 'react';
 
+// --- НОВИ ИМПОРТИ ЗА FIREBASE ---
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from './firebase';
+
 export default function Leaderboard({ onBack }) {
   const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedScores = JSON.parse(localStorage.getItem('bullsAndCowsLeaderboard')) || [];
-    const sortedScores = savedScores.sort((a, b) => {
-      if (b.level !== a.level) return b.level - a.level;
-      return b.score - a.score;
-    });
-    setScores(sortedScores.slice(0, 10));
+    const fetchLeaderboard = async () => {
+      try {
+        // Дърпаме Топ 10 от колекция "leaderboard", сортирани по най-много точки
+        const q = query(collection(db, "leaderboard"), orderBy("score", "desc"), limit(10));
+        const querySnapshot = await getDocs(q);
+        
+        const fetchedScores = [];
+        querySnapshot.forEach((doc) => {
+          fetchedScores.push(doc.data());
+        });
+        
+        setScores(fetchedScores);
+      } catch (error) {
+        console.error("Грешка при зареждане на класацията:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
   }, []);
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl w-full max-w-md p-8 border border-white/20">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500 mb-2">
-          Топ Играчи
+          Глобална Класация 🌍
         </h2>
-        <p className="text-sm font-medium text-gray-500">Зала на славата (Топ 10)</p>
+        <p className="text-sm font-medium text-gray-500">Топ 10 играчи в света</p>
       </div>
 
-      <div className="space-y-3 custom-scrollbar overflow-y-auto max-h-80 pr-2">
-        {scores.length > 0 ? (
+      <div className="space-y-3 custom-scrollbar overflow-y-auto max-h-80 pr-2 min-h-[150px] relative">
+        {/* Индикатор за зареждане */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-10 rounded-xl">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-4 border-indigo-600"></div>
+          </div>
+        )}
+
+        {!loading && scores.length > 0 ? (
           scores.map((score, index) => (
             <div 
               key={index}
@@ -41,7 +67,6 @@ export default function Leaderboard({ onBack }) {
                   #{index + 1}
                 </span>
                 <div>
-                  {/* Тук визуализираме името и нивото */}
                   <div className="font-bold text-gray-800 text-lg">
                     {score.name} <span className="text-xs text-gray-400 font-normal ml-1">(Ниво {score.level})</span>
                   </div>
@@ -53,10 +78,10 @@ export default function Leaderboard({ onBack }) {
               </div>
             </div>
           ))
-        ) : (
+        ) : !loading && (
           <div className="text-center py-8 text-gray-400 font-medium">
             <p>Все още няма резултати.</p>
-            <p className="text-sm mt-1">Изиграй първата си игра!</p>
+            <p className="text-sm mt-1">Бъди първият в света!</p>
           </div>
         )}
       </div>
