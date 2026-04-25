@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 // --- НОВИ ИМПОРТИ ЗА FIREBASE ---
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import { db } from './firebase';
+import { db } from '../../firebase';
 
 export default function Leaderboard({ onBack }) {
   const [scores, setScores] = useState([]);
