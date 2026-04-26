@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Confetti from 'react-confetti';
+import { Link } from 'react-router-dom'; // <-- НОВ ИМПОРТ ЗА РУТЕРА
 import { GAME_SETTINGS } from './constants';
 import { getRevealJoker, getPositionJoker } from './jokers';
 import Rules from './Rules';
@@ -26,13 +27,12 @@ const playSound = (soundName) => {
 };
 
 export default function BullsAndCowsApp() {
-  const [view, setView] = useState('game'); // Вътрешна навигация на играта
+  const [view, setView] = useState('game');
 
   const [secret, setSecret] = useState(generateSecretNumber);
   const [guess, setGuess] = useState('');
   const [history, setHistory] = useState([]);
   
-  // ПАМЕТ ЗА ЖОКЕРИТЕ
   const [usedJokers, setUsedJokers] = useState([]);
 
   const [error, setError] = useState('');
@@ -98,7 +98,7 @@ export default function BullsAndCowsApp() {
       return;
     }
     const digit = getRevealJoker(secret, history, usedJokers);
-    setUsedJokers(prev => [...prev, digit]); // Записваме в паметта
+    setUsedJokers(prev => [...prev, digit]); 
     setLives(prev => prev - GAME_SETTINGS.JOKER_REVEAL_COST);
     playSound('joker');
     showInfo(`💡 Жокер: Цифрата ${digit} участва! (-${GAME_SETTINGS.JOKER_REVEAL_COST} ❤️)`);
@@ -110,7 +110,7 @@ export default function BullsAndCowsApp() {
       return;
     }
     const { digit, position } = getPositionJoker(secret, history, usedJokers);
-    setUsedJokers(prev => [...prev, digit]); // Записваме в паметта
+    setUsedJokers(prev => [...prev, digit]); 
     setLives(prev => prev - GAME_SETTINGS.JOKER_POSITION_COST);
     playSound('joker');
     showInfo(`📍 Жокер: Цифрата ${digit} е на ${position}-ра позиция! (-${GAME_SETTINGS.JOKER_POSITION_COST} ❤️)`);
@@ -171,7 +171,7 @@ export default function BullsAndCowsApp() {
   const startNextLevel = () => {
     setSecret(generateSecretNumber());
     setHistory([]);
-    setUsedJokers([]); // Изчистваме паметта на жокерите
+    setUsedJokers([]); 
     setLives(lives + GAME_SETTINGS.BONUS_LIVES_PER_LEVEL);
     setLevel(level + 1);
     setIsLevelCleared(false);
@@ -204,8 +204,13 @@ export default function BullsAndCowsApp() {
 
   return (
     <div className="flex flex-col items-center w-full py-8 text-gray-800">
+      
       {/* Вътрешна навигация на играта */}
-      <div className="flex gap-4 mb-8">
+      <div className="flex flex-wrap justify-center gap-3 mb-8 w-full max-w-4xl px-4">
+        {/* --- БУТОН КЪМ ПОРТАЛА --- */}
+        <Link to="/" className="px-4 py-2 rounded-xl font-bold transition-all shadow-sm bg-gray-800 text-white hover:bg-gray-700 border border-gray-600 flex items-center gap-2">
+          ⬅️ Портал
+        </Link>
         <button onClick={() => setView('game')} className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${view === 'game' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white hover:bg-white/30'}`}>🎮 Игра</button>
         <button onClick={() => setView('rules')} className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${view === 'rules' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white hover:bg-white/30'}`}>📖 Правила</button>
         <button onClick={() => setView('leaderboard')} className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${view === 'leaderboard' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white hover:bg-white/30'}`}>🏆 Класация</button>
@@ -343,7 +348,7 @@ export default function BullsAndCowsApp() {
         </div>
       </div>
 
-      {/* Рендерираме Правила и Класация под същото меню, както преди */}
+      {/* Рендерираме Правила и Класация под същото меню */}
       {view === 'rules' && <Rules onBack={() => setView('game')} />}
       {view === 'leaderboard' && <Leaderboard onBack={() => setView('game')} />}
     </div>
