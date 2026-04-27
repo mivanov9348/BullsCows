@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import BullsAndCowsApp from './games/BullsAndCows/Game'; 
 import HangmanApp from './games/Hangman/Game';
 import TicTacToeApp from './games/TicTacToe/Game';
+import MathRushApp from './games/MathRush/Game'; 
 
 export default function App() {
   return (
@@ -70,22 +71,22 @@ export default function App() {
                 </div>
               </Link>
 
-              {/* ИГРА 3: Морски Шах */}
+              {/* ИГРА 3: Бърза Математика */}
               <Link 
-                to="/tictactoe" 
-                className="group relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl overflow-hidden hover:bg-white/20 transition-all duration-300 hover:shadow-[0_0_40px_rgba(52,211,153,0.4)] hover:-translate-y-2 flex flex-col"
+                to="/math" 
+                className="group relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl overflow-hidden hover:bg-white/20 transition-all duration-300 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)] hover:-translate-y-2 flex flex-col"
               >
-                <div className="h-48 bg-gradient-to-tr from-teal-500 to-emerald-600 flex items-center justify-center relative overflow-hidden">
-                  <span className="text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl relative z-10">❌⭕</span>
+                <div className="h-48 bg-gradient-to-tr from-blue-500 to-cyan-600 flex items-center justify-center relative overflow-hidden">
+                  <span className="text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl relative z-10">⏱️🔢</span>
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-2xl font-black text-white">Морски Шах</h2>
-                    <span className="bg-blue-500 text-xs font-bold px-3 py-1 rounded-full text-white shadow-sm">New</span>
+                    <h2 className="text-2xl font-black text-white">Бърза Математика</h2>
+                    <span className="bg-red-500 text-xs font-bold px-3 py-1 rounded-full text-white shadow-sm">Rush</span>
                   </div>
                   <p className="text-indigo-100 text-sm mb-6 flex-1 leading-relaxed">
-                    Класическият сблъсък. Нареди три поредни символа хоризонтално, вертикално или по диагонал.
+                    Решавай уравнения преди времето да изтече! Верен отговор дава време, грешен ти го взима.
                   </p>
                   <div className="text-yellow-400 font-bold text-base flex items-center gap-2 group-hover:text-yellow-300">
                     <span>Играй сега</span>
@@ -102,6 +103,9 @@ export default function App() {
         <Route path="/bulls" element={<BullsAndCowsApp />} />
         <Route path="/hangman" element={<HangmanApp />} />
         <Route path="/tictactoe" element={<TicTacToeApp />} />
+        
+        {/* ТОВА ЛИПСВАШЕ: Рутът за Math Rush */}
+        <Route path="/math" element={<MathRushApp />} />
       </Routes>
       
     </div>
