@@ -23,25 +23,28 @@ export default function MathRushApp() {
   
   const [gameOver, setGameOver] = useState(false);
   const [playerName, setPlayerName] = useState('');
-  const [flash, setFlash] = useState(null); // 'green' за верен, 'red' за грешен отговор
+  const [flash, setFlash] = useState(null); 
+  
+  const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Нов State за анимацията на точките
+  const [scorePop, setScorePop] = useState(false);
 
-  // Управление на таймера
   useEffect(() => {
+    if (isPlaying && timeLeft <= 0) {
+      setGameOver(true);
+      setIsPlaying(false);
+      playSound('fail');
+      return; 
+    }
+
     let timer;
-    // Таймерът върви само ако играем и сме в таба "game"
     if (isPlaying && !gameOver && view === 'game' && timeLeft > 0) {
       timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setGameOver(true);
-            setIsPlaying(false);
-            playSound('fail');
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft(prev => prev - 1);
       }, 1000);
     }
+    
     return () => clearInterval(timer);
   }, [isPlaying, gameOver, view, timeLeft]);
 
@@ -52,28 +55,39 @@ export default function MathRushApp() {
     setGameOver(false);
     setIsPlaying(true);
     setPlayerName('');
+    setShowConfetti(false);
   };
 
   const handleAnswer = (answer) => {
     if (!isPlaying || gameOver) return;
 
     if (answer === currentEq.correct) {
-      // Верен отговор
       playSound('ding');
       const newScore = score + MATH_SETTINGS.POINTS_PER_ANSWER;
+      
+      const oldHundreds = Math.floor(score / 100);
+      const newHundreds = Math.floor(newScore / 100);
+      if (newHundreds > oldHundreds && newHundreds > 0) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 4000); 
+      }
+
       setScore(newScore);
       setTimeLeft(prev => prev + MATH_SETTINGS.BONUS_TIME);
-      setCurrentEq(generateEquation(newScore)); // Даваме нова задача
+      setCurrentEq(generateEquation(newScore)); 
       
-      // Бърз зелен ефект на екрана
+      // Ефект за зелен екран
       setFlash('green');
       setTimeout(() => setFlash(null), 200);
+
+      // Ефект за туптене на точките
+      setScorePop(true);
+      setTimeout(() => setScorePop(false), 300);
+
     } else {
-      // Грешен отговор
       playSound('fail');
       setTimeLeft(prev => Math.max(0, prev - MATH_SETTINGS.PENALTY_TIME));
       
-      // Бърз червен ефект на екрана
       setFlash('red');
       setTimeout(() => setFlash(null), 200);
     }
@@ -95,11 +109,12 @@ export default function MathRushApp() {
   return (
     <div className="flex flex-col items-center w-full py-8 text-white min-h-screen relative">
       
-      {/* Флаш ефект при отговор */}
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={300} gravity={0.2} />}
+
       {flash === 'green' && <div className="absolute inset-0 bg-green-500/20 z-50 pointer-events-none transition-all duration-200"></div>}
       {flash === 'red' && <div className="absolute inset-0 bg-red-500/20 z-50 pointer-events-none transition-all duration-200"></div>}
 
-      <div className="flex flex-wrap justify-center gap-3 mb-8 w-full max-w-4xl px-4 z-20">
+      <div className="flex flex-wrap justify-center gap-3 mb-8 w-full max-w-4xl px-4 z-20 relative">
         <Link to="/" className="px-4 py-2 rounded-xl font-bold bg-gray-800 hover:bg-gray-700 border border-gray-600 flex items-center gap-2">⬅️ Портал</Link>
         <button onClick={() => setView('game')} className={`px-4 py-2 rounded-xl font-bold ${view === 'game' ? 'bg-white text-blue-600' : 'bg-white/10 hover:bg-white/20'}`}>🎮 Игра</button>
         <button onClick={() => setView('rules')} className={`px-4 py-2 rounded-xl font-bold ${view === 'rules' ? 'bg-white text-blue-600' : 'bg-white/10 hover:bg-white/20'}`}>📖 Правила</button>
@@ -110,19 +125,20 @@ export default function MathRushApp() {
       {view === 'leaderboard' && <Leaderboard onBack={() => setView('game')} />}
 
       {view === 'game' && (
-        <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl relative mx-4 text-center">
+        <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-3xl border border-white/20 shadow-2xl relative mx-4 text-center z-10">
           
-          {/* Статистика горе */}
           <div className="flex justify-between items-center mb-10 bg-black/20 p-4 rounded-2xl">
             <div>
               <span className="block text-xs text-gray-400 font-bold uppercase">Точки</span>
-              <span className="text-3xl font-black text-yellow-400">{score}</span>
+              {/* Тук добавихме анимацията (scale-125) когато scorePop е true */}
+              <span className={`text-3xl font-black text-yellow-400 inline-block transition-transform duration-200 ${scorePop ? 'scale-150 text-white' : 'scale-100'}`}>
+                {score}
+              </span>
             </div>
             <div>
               <span className="block text-xs text-gray-400 font-bold uppercase">Време</span>
-              {/* Таймерът става червен и пулсира, ако остават < 5 сек */}
               <span className={`text-4xl font-black ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-blue-400'}`}>
-                {timeLeft}s
+                {Math.max(0, timeLeft)}s
               </span>
             </div>
           </div>
@@ -152,12 +168,10 @@ export default function MathRushApp() {
             </div>
           ) : (
             <div className="py-4">
-              {/* Уравнението */}
               <div className="text-6xl font-black tracking-widest mb-12 drop-shadow-lg">
                 {currentEq?.text} = ?
               </div>
               
-              {/* Бутони с отговори */}
               <div className="grid grid-cols-2 gap-4">
                 {currentEq?.choices.map((choice, i) => (
                   <button
