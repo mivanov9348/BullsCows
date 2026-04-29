@@ -3,7 +3,8 @@ import BullsAndCowsApp from './games/BullsAndCows/Game';
 import HangmanApp from './games/Hangman/Game';
 import TicTacToeApp from './games/TicTacToe/Game';
 import MathRushApp from './games/MathRush/Game'; 
-import WordleApp from './games/Wordle/Game'; // <-- НОВИЯТ ИМПОРТ
+import WordleApp from './games/Wordle/Game'; 
+import SimonSaysApp from './games/SimonSays/Game';
 
 export default function App() {
   return (
@@ -96,6 +97,26 @@ export default function App() {
                 </div>
               </Link>
 
+              {/* ИГРА 5: Саймън Казва */}
+              <Link to="/simon" className="group relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl overflow-hidden hover:bg-white/20 transition-all duration-300 hover:shadow-[0_0_40px_rgba(236,72,153,0.4)] hover:-translate-y-2 flex flex-col">
+                <div className="h-48 bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center relative overflow-hidden">
+                  <span className="text-7xl group-hover:scale-110 transition-transform duration-300 drop-shadow-xl relative z-10">🧠💡</span>
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
+                    <h2 className="text-2xl font-black text-white">Саймън Казва</h2>
+                    <span className="bg-purple-500 text-xs font-bold px-3 py-1 rounded-full text-white shadow-sm">Memory</span>
+                  </div>
+                  <p className="text-indigo-100 text-sm mb-6 flex-1 leading-relaxed">
+                    Тренирай паметта си! Запомни и повтори светещата поредица от цветове. Една грешка и отпадаш.
+                  </p>
+                  <div className="text-yellow-400 font-bold text-base flex items-center gap-2 group-hover:text-yellow-300">
+                    <span>Играй сега</span><span className="group-hover:translate-x-2 transition-transform duration-300">➡️</span>
+                  </div>
+                </div>
+              </Link>
+
               {/* ИГРА 5: Морски Шах */}
               <Link to="/tictactoe" className="group relative bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                 <div className="h-48 bg-gray-800/80 flex items-center justify-center">
@@ -119,6 +140,7 @@ export default function App() {
         <Route path="/tictactoe" element={<TicTacToeApp />} />
         <Route path="/math" element={<MathRushApp />} />
         <Route path="/wordle" element={<WordleApp />} /> {/* <-- РУТ ЗА ДУМИЧКИ */}
+        <Route path="/simon" element={<SimonSaysApp />} />
       </Routes>
       
     </div>

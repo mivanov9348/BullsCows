@@ -27,13 +27,14 @@ export default function WordleApp() {
   const [infoMessage, setInfoMessage] = useState('');
   const [shakeRow, setShakeRow] = useState(false);
   
-  const [earnedPoints, setEarnedPoints] = useState(null); // За показване на спечелените точки
+  const [earnedPoints, setEarnedPoints] = useState(null); 
 
   useEffect(() => {
-    startNewGame();
+    startNewLevel();
   }, []);
 
-  const startNewGame = () => {
+  // Започва ново ниво, без да нулира точките (за поредица от победи)
+  const startNewLevel = () => {
     const randomWord = WORDS_DATABASE[Math.floor(Math.random() * WORDS_DATABASE.length)];
     setSecretWord(randomWord);
     setGuesses([]);
@@ -44,9 +45,10 @@ export default function WordleApp() {
     setEarnedPoints(null);
   };
 
+  // Пълно рестартиране при загуба
   const restartFullGame = () => {
     setScore(0);
-    startNewGame();
+    startNewLevel();
   };
 
   const showInfo = (msg) => {
@@ -65,6 +67,17 @@ export default function WordleApp() {
         return;
       }
       
+      // Допълнителна проверка: Дали думата е валидна (има ли я в базата)?
+      // Ако искаш да го направиш строго, разкоментирай долните редове:
+      /*
+      if (!WORDS_DATABASE.includes(currentGuess)) {
+        setShakeRow(true);
+        showInfo('Няма такава дума!');
+        setTimeout(() => setShakeRow(false), 500);
+        return;
+      }
+      */
+
       const newGuesses = [...guesses, currentGuess];
       setGuesses(newGuesses);
       setCurrentGuess('');
@@ -73,11 +86,9 @@ export default function WordleApp() {
         playSound('win');
         setGameWon(true);
         
-        // --- НОВАТА ЛОГИКА ЗА ТОЧКУВАНЕ ---
         const points = WORDLE_SETTINGS.ATTEMPT_SCORES[newGuesses.length - 1];
-        setEarnedPoints(points); // Запазваме ги, за да ги покажем на екрана
+        setEarnedPoints(points); 
         setScore(prev => prev + points);
-        // ----------------------------------
         
       } else if (newGuesses.length >= WORDLE_SETTINGS.MAX_ATTEMPTS) {
         playSound('fail');
@@ -102,7 +113,10 @@ export default function WordleApp() {
     const handleKeyDown = (e) => {
       let key = e.key.toUpperCase();
       if (key === 'BACKSPACE') key = 'DEL';
-      handleKeyPress(key);
+      // Игнорираме други клавиши
+      if (key === 'ENTER' || key === 'DEL' || /^[А-ЯЪЬЮЯ]$/.test(key)) {
+        handleKeyPress(key);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -192,7 +206,6 @@ export default function WordleApp() {
             {infoMessage && <span className="bg-gray-800 text-white px-4 py-1 rounded-lg text-sm font-bold shadow">{infoMessage}</span>}
           </div>
 
-          {/* GRID С ДУМИТЕ */}
           <div className="flex flex-col gap-2 mb-8 items-center">
             {Array.from({ length: WORDLE_SETTINGS.MAX_ATTEMPTS }).map((_, rowIndex) => {
               const isCurrentRow = rowIndex === guesses.length;
@@ -223,14 +236,12 @@ export default function WordleApp() {
             })}
           </div>
 
-          {/* КРАЙНИ ЕКРАНИ */}
           {(gameOver || gameWon) && (
             <div className="mb-6 p-4 bg-gray-900/80 rounded-xl border border-gray-700 animate-[fadeIn_0.5s_ease-in-out]">
               <h2 className={`text-2xl font-black mb-2 ${gameWon ? 'text-green-400' : 'text-red-500'}`}>
                 {gameWon ? "ПОЗДРАВЛЕНИЯ!" : "КРАЙ НА ИГРАТА"}
               </h2>
               
-              {/* Показваме спечелените точки, ако е познал */}
               {gameWon && earnedPoints && (
                 <p className="text-yellow-400 font-bold mb-2 text-lg animate-bounce">
                   Спечели +{earnedPoints} точки!
@@ -246,13 +257,12 @@ export default function WordleApp() {
                 </div>
               )}
               
-              <button onClick={gameWon ? startNewGame : restartFullGame} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-black mt-2">
+              <button onClick={gameWon ? startNewLevel : restartFullGame} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-black mt-2">
                 {gameWon ? "СЛЕДВАЩА ДУМА ➡️" : "🔄 НОВА ИГРА"}
               </button>
             </div>
           )}
 
-          {/* ВИРТУАЛНА КЛАВИАТУРА */}
           {!gameOver && !gameWon && (
             <div className="flex flex-col gap-2 w-full max-w-sm mx-auto mt-auto">
               {KEYBOARD_ROWS.map((row, i) => (
